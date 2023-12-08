@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "torque2024-hawc2-simulations"
+version = "0.1.0"
+description = ""
+authors = ["Jaime Liew <jaimeliew1@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "torque2024_hawc2_simulations" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = ">=1.16.5"
+scipy = ">=1.6"
+jinja2 = "^3.1.2"
+data-tsar = {git = "https://github.com/jaimeliew1/Data-TSAR.git"}
+polars = "^0.19.19"
+matplotlib = "^3.7.3"
+click = "^8.1.7"
+foreach = "^0.1.0"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
