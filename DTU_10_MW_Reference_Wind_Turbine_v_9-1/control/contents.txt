@@ -1,0 +1,5 @@
+dtu_we_controller_64.dll      	0.4
+generator_servo_64.dll        	0.0.1
+mech_brake_64.dll               0.2.0.0
+servo_with_limits_64.dll        1.2.0.0
+towerclearance_mblade_64.dll    1.0.1.65535
