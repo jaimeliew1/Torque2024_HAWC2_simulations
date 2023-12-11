@@ -1,5 +1,6 @@
 from pathlib import Path
 from TSAR import TimeSeriesAggregator
+import polars as pl
 
 RESDIR = Path("DTU_10_MW_Reference_Wind_Turbine_v_9-1/res")
 OUT_FN = Path("pitch_tsr_HAWC2.csv")
@@ -23,7 +24,19 @@ if __name__ == "__main__":
     agg.run_par(tstart=80)
     df = agg.to_dataframe()
 
+    df = (
+        pl.from_pandas(
+            df,
+        )
+        .select(pl.exclude("", "chunk"))
+        .rename(
+            {
+                "torque_mean": "torque",
+                "power_mean": "power",
+                "thrust_mean": "thrust",
+                "omega_mean": "omega",
+            }
+        )
+    )
     print(df)
-
-    df.to_csv(OUT_FN) # to do: convert to polars ans substitute column names
-
+    df.write_csv(OUT_FN)

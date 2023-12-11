@@ -10,40 +10,37 @@ FIGDIR.mkdir(parents=True, exist_ok=True)
 
 DATA_FN = Path("pitch_tsr_HAWC2.csv")
 
-
+power_normaliser = 0.5 * 1.225 * np.pi * 89**2 * 5**3 / 1000
 if __name__ == "__main__":
-    df = (
-        pl.read_csv(DATA_FN)
-        .select(pl.exclude("", "chunk"))
-        .rename(
-            {
-                "torque_mean": "torque",
-                "power_mean": "power",
-                "thrust_mean": "thrust",
-                "omega_mean": "omega",
-            }
-        )
+    # Load aggregated data.
+    df = pl.read_csv(DATA_FN).with_columns(
+        (pl.col("power") / power_normaliser).alias("Cp")
     )
+
     print(df)
 
-    df_piv = df.filter(pl.col("yaw") == 45).pivot(
-        index="tsr", columns="pitch", values="power", sort_columns=True,
-    ).sort("tsr")
-    # df_piv = df_piv.select("tsr", pl.col(sorted(df.columns[1:])))
-    print(df_piv)
+    # Pivot
+    df_piv = (
+        df.filter(pl.col("yaw") == 0)
+        .sort(["pitch", "tsr"])
+        .pivot(
+            index="tsr",
+            columns="pitch",
+            values="Cp",
+        )
+        .sort(["tsr"])
+    )
 
-    tsr = df_piv["tsr"].to_numpy()/2
+    tsr = df_piv["tsr"].to_numpy() / 2
     pitch = np.array(df_piv.columns[1:], dtype=float)
     Z = df_piv.to_numpy()[:, 1:]
     Z[Z < 0] = 0.01
 
-    # ax.set_title(surface_label[key])
-
+    # Plot
     fig, ax = plt.subplots()
-    ax.plot(-df["pitch"], df["tsr"]/2, ".k")
     ax.contourf(-pitch, tsr, Z, cmap="viridis")
-    # CS = ax.contour(-pitch, tsr, Z, colors="k", linewidths=0.8)
-    # ax.clabel(CS, inline=True, fontsize=10)
+    CS = ax.contour(-pitch, tsr, Z, colors="k", linewidths=0.8)
+    ax.clabel(CS, inline=True, fontsize=10)
 
     plt.ylim(5, 12)
     plt.xlim(-15, 15)

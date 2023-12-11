@@ -8,12 +8,16 @@ HTCDIR = Path("DTU_10_MW_Reference_Wind_Turbine_v_9-1/htc")
 
 def check_complete(fn_log: Path) -> bool:
     with open(fn_log) as f:
-        last_line = f.readlines()[-1]
-    return "Elapsed" in last_line
+        lines = f.readlines()
+        if len(lines) == 0:
+            return False
+    return "Elapsed" in lines[-1]
 
 
 if __name__ == "__main__":
-    complete_stems = [fn.stem for fn in tqdm(LOGDIR.glob("*.log")) if check_complete(fn)]
+    complete_stems = [
+        fn.stem for fn in tqdm(LOGDIR.glob("*.log")) if check_complete(fn)
+    ]
 
     htc_to_delete = [fn for fn in HTCDIR.glob("*.htc") if fn.stem in complete_stems]
     if click.confirm(

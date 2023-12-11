@@ -1,7 +1,7 @@
 from pathlib import Path
 from TSAR import HAWC2IO
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+from foreach import foreach
 
 FIGDIR = Path("fig")
 FIGDIR.mkdir(parents=True, exist_ok=True)
@@ -20,15 +20,19 @@ channels = {
 }
 
 
+def plot(fn):
+    df = HAWC2IO.read(fn, channels)
+
+    fig, axes = plt.subplots(len(channels), 1, sharex=True)
+    for channel, ax in zip(channels.keys(), axes):
+        ax.plot(df.index, df[channel])
+        ax.set_ylabel(channel)
+
+    plt.savefig(FIGDIR / f"{fn.stem}.png", bbox_inches="tight", dpi=500)
+    plt.close()
+
+
 if __name__ == "__main__":
-    filelist = list(RESDIR.glob("*.hdf5"))
+    filelist = list(RESDIR.glob("*yaw0.00.hdf5"))
 
-    for fn in tqdm(filelist):
-        df = HAWC2IO.read(fn, channels)
-
-        fig, axes = plt.subplots(len(channels), 1, sharex=True)
-        for channel, ax in zip(channels.keys(), axes):
-            ax.plot(df.index, df[channel])
-            ax.set_ylabel(channel)
-
-        plt.savefig(FIGDIR / f"{fn.stem}.png", bbox_inches="tight", dpi=500)
+    foreach(plot, filelist)
